@@ -1,0 +1,73 @@
+plugins {
+    id 'fabric-loom' version '1.17.20'
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+base { archivesName = project.archives_base_name }
+
+repositories { mavenCentral() }
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    if (project.hasProperty('tabCompatMods')) {
+        modLocalRuntime files(project.property('tabCompatMods').toString().split(';'))
+    }
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand 'version': project.version }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    withSourcesJar()
+}
+
+sourceSets {
+    verification {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+    smoke {
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
+tasks.register('verifyChunkRange', JavaExec) {
+    dependsOn verificationClasses
+    classpath = sourceSets.verification.runtimeClasspath
+    mainClass = 'dev.mihek.chunkhat.ActiveChunkRangeTest'
+}
+
+check.dependsOn verifyChunkRange
+
+jar { from('LICENSE') }
+
+// Starts Fabric's real transformer, then exits before Minecraft opens a window.
+// Test classes and metadata are excluded from the shipped mod.
+tasks.register('verifyMixins', JavaExec) {
+    dependsOn classes, smokeClasses
+    classpath = sourceSets.smoke.runtimeClasspath
+    mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+    systemProperty 'fabric.development', 'true'
+    systemProperty 'fabric.classPathGroups', [sourceSets.main.output, sourceSets.smoke.output]
+            .collect { it.files.collect { f -> f.absolutePath }.join(File.pathSeparator) }
+            .join(File.pathSeparator + File.pathSeparator)
+    systemProperty 'fabric.addMods', [sourceSets.main.output.resourcesDir, sourceSets.smoke.output.resourcesDir]
+            .collect { it.absolutePath }.join(File.pathSeparator)
+    workingDir layout.buildDirectory.dir('smoke-run')
+    doFirst { workingDir.mkdirs() }
+    args '--version', project.minecraft_version
+}

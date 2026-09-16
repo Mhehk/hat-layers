@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "chunk_hat_smoke",
+  "version": "1.0.0",
+  "name": "Hat Layers transform verification (development only)",
+  "environment": "client",
+  "entrypoints": { "preLaunch": ["dev.mihek.chunkhat.smoke.MixinSmokeTest"] },
+  "depends": { "chunk_hat": "*" }
+}

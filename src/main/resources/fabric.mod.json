@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "chunk_hat",
+  "version": "${version}",
+  "name": "Hat Layers",
+  "description": "Shows TAB hat layers and a small outlined asterisk for tracked players inside your active chunk view.",
+  "authors": ["mihek"],
+  "icon": "assets/chunk_hat/icon.png",
+  "environment": "client",
+  "license": "MIT",
+  "mixins": ["chunk_hat.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "1.21.11",
+    "java": ">=21"
+  }
+}

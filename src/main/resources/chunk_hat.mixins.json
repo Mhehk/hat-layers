@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "dev.mihek.chunkhat.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["PlayerListHudMixin", "ClientPlayNetworkHandlerMixin"],
+  "injectors": { "defaultRequire": 1 }
+}
